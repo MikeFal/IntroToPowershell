@@ -1,6 +1,9 @@
 ﻿#A few things before we get started(these need to be run as administrator)
 Update-Help
-#Set-ExecutionPolicy RemoteSigned
+Set-ExecutionPolicy RemoteSigned
+
+#Execution policies are a security feature to protect against malicious scripts
+get-help about_executionpolicies
 
 #What version are we using?
 $PSVersionTable
@@ -26,6 +29,9 @@ Get-ChildItem C:\
 
 #We can see all the aliases for a cmdlet
 Get-Alias -Definition Get-ChildItem
+
+#let's use a cmdlet to make a new directory
+New-Item -ItemType Directory 'C:\TEMP'
 
 #Providers - Drives and more
 Get-PSDrive
@@ -110,10 +116,13 @@ $file.Delete()
 $file
 dir C:\TEMP
 $file.Refresh()
+$file
 $file.Exists
 
 #cmdlets and functions will output objects.  You can work with them by using ()
 (Get-ChildItem C:\Windows).Length
+
+(Get-Date).AddDays(-3)
 
 #Concatenation and Interpolation
 #The plus sign is used for concatenation
@@ -121,6 +130,7 @@ $file.Exists
 $temperature = 'Hot'
 'Tea. Earl Grey. ' + $temperature + '.'
 
+#We can use interpolation to make life easier and cleaner.
 #Interpolation is a useful tool when working with variables, especially strings.
 "Tea. Earl Grey. $temperature."
 'Tea. Earl Grey. $temperature.'
@@ -135,16 +145,23 @@ Get-Help about_pipelines
 #It works something like a "gate" where everything thing on the left side that matches
 #gets passed to the right.
 
+#we've used it already for Get-Member
+(Get-ChildItem C:\) | Get-Member
+
+#We can also use it for performing an action on a object
 dir C:\DBFiles\backups\backups\*.trn
 dir C:\DBFiles\backups\backups\*.trn | Remove-Item -WhatIf
 
 #We can use the pipeline to further enhance our actions
 dir C:\DBFiles\backups\backups\ -Recurse | Where-Object {$_.Extension  -eq ".trn" -and $_.LastWriteTime -lt (Get-Date).AddDays(-3)} | rm -WhatIf
 
+#$_ means the current object in the pipeline.  In the above example, we want to reference the Extension and LastWriteTime properties for the current object
+
+
 #Operators and variable comparison
 Get-Help about_operators
 
-#Symbols like '>' and '<' mean different things in standard shells.
+#Symbols like '>' and '<' mean different things in standard shell scripting.
 
 #You use -lt, -ne, -eq, and other phrases are used to perform logical compariso
 '1 -eq 2 returns:' + (1 -eq 2)
@@ -154,21 +171,6 @@ Get-Help about_operators
 '1 -eq 1 -or 1 -gt 2 returns:' + (1 -eq 1 -or 1 -gt 2)
 '1 -eq 1 -and 1 -lt 2 returns:' + (1 -eq 1 -and 1 -lt 2)
 
-#Collections and Arrays
-Get-Help about_arrays
-
-#Arrays are useful ways to collect data
-$list = @("HIKARU","MINMEI")
-$list
-
-#Specify the specific item in an array with [] (0 based numbering)
-"This is list item #3:"+ $list[1]
-
-#control structures
-Get-Help about_If
-Get-Help about_While
-Get-Help about_ForEach
-Get-Help about_Switch
 #Powershell also has control flow structures that you can use
 #if(){
 #}
@@ -184,8 +186,18 @@ Get-Help about_Switch
 #switch(){
 #}
 
+Get-Help about_If
+Get-Help about_While
+Get-Help about_ForEach
+Get-Help about_Switch
+
 #Use If to check for things, like if a file or directory exists (and what to do if it doesn't)
+New-Item -ItemType Directory -Path 'C:\TEMP'
 If((Test-Path 'C:\TEMP') -eq $false){New-Item -ItemType Directory -Path 'C:\TEMP'}
+
+Remove-Item -Recurse 'C:\TEMP'
+If((Test-Path 'C:\TEMP') -eq $false){New-Item -ItemType Directory -Path 'C:\TEMP'}
+
 
 #while or until do things based on their conditions
 #do is sytnax that allows you to put the while/until at the end of the loop instead of the beginning
@@ -205,9 +217,17 @@ do{
 
 dir C:\TEMP
 
+#Collections and Arrays
+Get-Help about_arrays
+
+#Arrays are useful ways to collect data
+$list = @('PICARD','RIKER','WESLEY')
+$list
+
+#Specify the specific item in an array with [] (0 based numbering)
+"This is list item #2:"+ $list[1]
 
 #Use foreach to iterate through collections
-$list = @("PICARD","RIKER","WORF")
 foreach ($item in $list){
     "Item $item" | out-host
 }
@@ -219,11 +239,27 @@ foreach($dir in $dirs){
     $count = (dir $fullname | Measure-Object).Count
     "$fullname - $count"
     if($count -gt 10){
-        Write-Host "$fullname has lots of files!"
+        "$fullname has lots of files!"| out-host
     }
     else{
-        Write-host "$fullname is kind of puny."
+        "$fullname is kind of puny."| out-host
     }
+}
+
+#Powershell supports error handling with standard syntax: try/catch/finally/throw
+get-help about_try_catch_finally
+get-help about_throw
+
+
+try{ #the inital thing we try to do
+    "This is a code block" |
+    throw (Write-warning "Then an Error happens....")
+}
+catch{ #What happens with an error
+    Write-Error "An error has occurred!" #using Write-Error actually feeds things to the host's error handling system
+}
+finally{ #optional, always happens
+    Write-host "Run a cleanup action" -ForegroundColor Green #Write-Host is generally not used, but here in this case to change text color
 }
 
 #Powershell can interface with .Net libraries, COM objects, other functionality.
@@ -235,37 +271,48 @@ $wmi.NumberOfProcessors
 $Wmi.NumberOfLogicalProcessors
 $wmi.Domain
 
-#Using the WMI, we can query useful information about this and other computers.
-#This funcion allows us to query all the attached volumes (disks and mountpoints) for size and freespace.
-function Get-FreeSpace{
-    param([string] $hostname = ($env:COMPUTERNAME))
+#We can format output in a couple different ways.  Table and list are the most commonly used options
+$wmi | Format-List
+$wmi | Format-Table
 
-	gwmi win32_volume -computername $hostname  | where {$_.drivetype -eq 3} | Sort-Object name `
+#Note that the object doesn't display everything available.  We can control this with Select-Object.
+$wmi | Select-Object Name,Domain,TotalPhysicalMemory,NumberOfProcessors,Model | Format-List
+
+$wmi | Select-Object Name,Domain,TotalPhysicalMemory,NumberOfProcessors,Model | Format-Table -AutoSize
+
+#of course, we can get really fancy
+#This funcion allows us to query all the attached volumes (disks and mountpoints) for size and freespace.
+gwmi win32_volume -computername 'localhost' | where {$_.drivetype -eq 3} | Sort-Object name `
 	 | Format-Table name,@{l="Size(GB)";e={($_.capacity/1gb).ToString("F2")}},@{l="Free Space(GB)";e={($_.freespace/1gb).ToString("F2")}},@{l="% Free";e={(($_.Freespace/$_.Capacity)*100).ToString("F2")}}
 
-}
-
-
 #Note the -computername parameter.  We can execute the WMI call against a remote machine if we want.
+#Working with our previous example, we could make a quick inventory report of our environment
+$comps = Get-ADComputer -Filter 'ObjectClass -eq "Computer"' 
+Get-WmiObject -Class Win32_ComputerSystem -ComputerName $comps.name | Select-Object Name,Domain,TotalPhysicalMemory,NumberOfProcessors,Model | Format-Table -AutoSize
+
 #Many commands in Powershell can be used remotely.
 Get-Help about_remote
 
 #We can also use an ssh-like command to enter a Powershell terminal session on a remote machine
-Enter-PSSession -ComputerName MISA
+Enter-PSSession -ComputerName PICARD
+
+$env:computername
+$env:username
+exit
 
 #Also, we can use the Invoke-Command cmdlet to run any command remotely.
 [ScriptBlock]$cmd = {Test-Path -Path 'C:\DBFiles'}
 
-Invoke-Command -ComputerName MISA -ScriptBlock $cmd
+Invoke-Command -ComputerName PICARD -ScriptBlock $cmd
 
-#For these to work, Windows Remote Managment needs to be enabled and firewall rules set to allow the remote connections.
+#For these to work, Windows Remote Managment(WinRM) needs to be enabled and firewall rules set to allow the remote connections.
 
 #While we have a base set of cmdlets and functions, we can also extend Powershell through the use of modules and snap-ins
 #Snap-ins were introduced in v1, but were replaced by modules in v2+
 
-Import-Module Hyper-V
-Get-Command -Module Hyper-V
+Import-Module ActiveDirectory
+Get-Command -Module ActiveDirectory
 
 #With Powershell 3, modules can be implicitly loaded when you use a cmdlet from that module
-Remove-Module Hyper-V
-Get-VM
+Remove-Module ActiveDirectory
+Get-ADDomain

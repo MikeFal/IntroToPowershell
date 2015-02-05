@@ -6,17 +6,18 @@ Get-Help New-Restore
 Get-Help New-Restore -Full
 Get-Help New-Restore -Examples
 
-$srv = "localhost"
-New-Restore -dir "C:\DBFiles\backups\restoredemo\" -server $srv  -database "restoredemo_copy"
+$srv = "PICARD"
+$db='dummy2'
+New-Restore -dir "\\PICARD\backups\dummy" -server $srv  -database $db
 
-Invoke-Sqlcmd -ServerInstance $srv -Query "drop database restoredemo_copy"
-New-Restore -dir "C:\DBFiles\backups\restoredemo\" -server $srv -database "restoredemo_copy" -newdata "C:\DBFiles\restoredemo_copy" -newlog "C:\DBFiles\restoredemo_copy" -Execute
+Invoke-Sqlcmd -ServerInstance $srv -Query "if exists (select 1 from sys.databases where name = '$db') drop database $db"
+New-Restore -dir "\\PICARD\backups\dummy" -server $srv -database "dummy2" -newdata "C:\DBFiles" -newlog "C:\DBFiles" -Execute
 
 #Migrate database
 Get-Help Sync-DBUsers
-$db = "restoredemo_migration"
-$srv = "localhost\ALBEDO"
-New-Restore -dir "C:\DBFiles\backups\restoredemo" -server "localhost\ALBEDO" -database $db -newdata "C:\DBFiles\backups\migration" -newlog "C:\DBFiles\backups\migration" -Execute
+$db = "dummy_migration"
+$srv = "PICARD\WESLEY"
+New-Restore -dir "\\PICARD\backups\dummy" -server 'PICARD\WESLEY' -database $db -newdata "C:\DBFiles\migration" -newlog "C:\DBFiles\migration" -Execute
 Invoke-Sqlcmd -ServerInstance $srv -Query "ALTER AUTHORIZATION ON database::[$db] TO [sa]"
 Sync-DBUsers -server $srv -database $db
 
@@ -31,9 +32,10 @@ Sync-DBUsers -server $srv -database $db
 
 #Restore testing
 Get-Help Get-DBCCCheckDB
-$db = "CorruptMe"
-$srv = "localhost"
-New-Restore -server $srv -database $db -dir "C:\DBFiles\backups\corruptme" -newdata "C:\DBFiles\Data" -newlog "C:\DBfiles\Log" -Execute
+$srv = "PICARD"
+$db='CorruptMe2'
+Invoke-Sqlcmd -ServerInstance $srv -Query "if exists (select 1 from sys.databases where name = '$db') drop database $db"
+New-Restore -server $srv -database $db -dir "\\PICARD\backups\corruptme" -newdata "C:\DBFiles\" -newlog "C:\DBfiles\" -Execute
 
 Get-DBCCCheckDB -server $srv -database $db
 

@@ -12,4 +12,4 @@ Get-command -Module SQLInventory
 
 
 #run the primary inventory collection function
-Get-SQLInventory -invlist @('localhost','localhost\ALBEDO')
+Get-SQLInventory -invlist @('PICARD','PICARD\WESLEY') -invserv 'PICARD' -invdb 'MSFADMIN'

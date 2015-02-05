@@ -32,13 +32,13 @@
         
         cSQLInstall SQLInstall{
             InstanceName = 'MSSQLSERVER'
-            InstallPath = '\\HIKARU\InstallFiles\SQL2014'
-            ConfigPath = '\\HIKARU\InstallFiles\SQL2014\SQL2014_Core_DSC.ini'
+            InstallPath = '\\HIKARUDC\InstallFiles\SQLServer\SQL2014'
+            ConfigPath = '\\HIKARUDC\InstallFiles\SQLServer\SQL2014_Core_DSC.ini'
             UpdateEnabled = $true
-            UpdatePath = '\\HIKARU\InstallFiles\SQL2014\Updates'
+            UpdatePath = '\\HIKARUDC\InstallFiles\SQLServer\SQL2014\Updates'
             DependsOn = @("[File]DataDir","[File]LogDir","[File]TempDBDir","[WindowsFeature]NETCore")
         }
     }
 }
 
-SQLServer -ComputerName MISA
+SQLServer -ComputerName RIKER

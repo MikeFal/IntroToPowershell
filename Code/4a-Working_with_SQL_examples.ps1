@@ -1,5 +1,20 @@
-﻿#Add a list of servers to your CMS
-$servers = @('HIKARU','MINMEI')
+﻿
+#Simple t-log restore script
+if(Test-Path 'C:\IntroToPowershell\RestoreDummyLogs.sql'){Remove-Item 'C:\IntroToPowershell\RestoreDummyLogs.sql'}
+$files = Get-ChildItem '\\picard\Backups\dummy\*.trn' | Sort-Object LastWriteTime 
+$files |ForEach-Object {"RESTORE DATABASE [dummy] FROM DISK=N`'" + $_.FullName + "`' WITH NORECOVERY" | Out-File -Append 'C:\IntroToPowershell\RestoreDummyLogs.sql' }
+
+#extract all your database schemas as dacpacs
+$server = 'PICARD'
+$dbs = Invoke-Sqlcmd -ServerInstance $server -Database tempdb -Query 'SELECT name FROM sys.databases WHERE database_id >4'
+
+foreach($db in $dbs.name){
+    $cmd = "& 'C:\Program Files (x86)\Microsoft SQL Server\120\DAC\bin\sqlpackage.exe' /action:Extract /targetfile:'C:\IntroToPowershell\$db.dacpac' /SourceServerName:$server /SourceDatabaseName:$db"
+    Invoke-Expression $cmd
+}
+
+#Add a list of servers to your CMS
+$servers = @('RIKER','WORF')
 
 foreach ($server in $servers)
 {
@@ -13,7 +28,7 @@ foreach ($server in $servers)
 }
 
 #backup databases in parallel
-$dbs = Invoke-Sqlcmd -ServerInstance localhost -Database tempdb -Query "SELECT name FROM sys.databases WHERE database_id > 4"
+$dbs = Invoke-Sqlcmd -ServerInstance PICARD -Database tempdb -Query "SELECT name FROM sys.databases WHERE database_id > 4"
 $datestring =  (Get-Date -Format 'yyyyMMddHHmm')
 
 foreach($db in $dbs.name){
@@ -30,52 +45,48 @@ foreach($db in $dbs.name){
 }
 
 
-#change all service accounts for all servers in the CMS
+#change all service accounts for a list of servers
 cd C:\
-$account = ''
-$password = ''
+$account = 'SDF\sqlsvc'
+$password = 'SQLp@55word'
+#$password = '73gnat!9'
 
-$servers= dir "SQLSERVER:\SQLRegistration\Central Management Server Group\SHION"
-foreach($server in $servers.Name){
+$servers= @('PICARD')
+
+foreach($server in $servers){
     $wmi = new-object ("Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer") $Server
-		$svcs = $wmi.services | where {$_.Type -eq 'SqlServer'} 
+	$svcs = $wmi.services | where {$_.Type -eq 'SqlServer'} 
+
+    $svcs | Select-Object DisplayName,ServiceAccount
+   
     foreach($svc in $svcs){
         try{
             $svc.SetServiceAccount($account,$password)
         }
         catch{
-            write-error[0]
+            write-error $error[0]
+        }
     }
+   $svcs | Select-Object DisplayName,ServiceAccount
 }
 
-#Grow log file in 8GB chunks
-#load assemblies
-[System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | out-null
-$ErrorActionPreference = 'Inquire'
 
-function Expand-SqlLogFile{
-  param(
-  [string]$InstanceName = 'localhost',
-  [parameter(Mandatory=$true)][string] $DatabaseName,
-  [parameter(Mandatory=$true)][int] $LogSizeMB)
+#Configure SQL Server with the SMO:
+$smosrv = New-Object ('Microsoft.SqlServer.Management.Smo.Database') 'PICARD'
 
-#Convert MB to KB (SMO works in KB)
-[int]$LogFileSize = $LogSizeMB*1024
+$smosrv.Configuration.MaxServerMemory.ConfigValue = 1024
+$smosrv.Configuration.DefaultBackupCompression.ConfigValue = 1
+$smosrv.Configuration.IsSqlClrEnabled.ConfigValue = 1
+$smosrv.Configuration.OptimizeAdhocWorkLoads.ConfigValue = 1
+$smosrv.Configuration.Alter()
 
-#Set base information
-$srv = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Server $InstanceName
-$logfile = $srv.Databases[$DatabaseName].LogFiles[0]
-$CurrSize = $logfile.Size
+$smosrv.AuditLevel = [Microsoft.SqlServer.Management.Smo.AuditLevel]::Failure
+$smosrv.NumberOfLogFiles =99
+$smosrv.Alter()
 
-#grow file
-while($CurrSize -lt $LogFileSize){
-  if(($LogFileSize - $CurrSize) -lt 8192000){$CurrSize = $LogFileSize}
-  else{$CurrSize += 8192000}
-  logfile.size = $CurrSize
-  $logfile.Alter()
-  }
-}
-#Call the function
-Expand-SqlLogFile -DatabaseName 'test' -LogSizeMB 35000
+$smosrv.jobserver.MaximumHistoryRows = 100000
+$smosrv.jobserver.MaximumJobHistoryRows = 2000
+$smosrv.JobServer.Alter()
 
-#Check growth on SQL Instance
+$smosrv.databases['model'].RecoveryModel = 'Simple'
+$smosrv.databases['model'].Alter()

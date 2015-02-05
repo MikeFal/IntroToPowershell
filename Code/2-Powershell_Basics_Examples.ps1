@@ -5,16 +5,16 @@ dir C:\DBFiles\backups\backups\ -Recurse | Where-Object {$_.Extension  -eq ".trn
 
 #-------------------------------------------------------------
 #We can use Get-Service to find our SQL Server services
-Get-Service *SQL*
+Get-Service -computername PICARD *SQL*
 
 #What if we want to do a check for any SQL Server services not running?
-Get-Service *SQL* | Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
+Get-Service -computername PICARD *SQL* | Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
 
 #stop the service so it will cause an alert
-Stop-Service MSSQLSERVER -force
+Stop-Service -computername PICARD MSSQLSERVER -force
 
 #So it doesn't take much more to write a script to alert us if SQL Server isn't running
-$svcs =Get-Service *SQL* | Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
+$svcs =Get-Service -computername PICARD *SQL* | Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
 
 $count = ($svcs | Measure-Object).Count
 if($count -gt 0){
@@ -23,7 +23,7 @@ if($count -gt 0){
 
 #We could get even more clever and start all the services from that object
 foreach($svc in $svcs){
-    Start-Service $svc
+    Start-Service -computername PICARD $svc
 }
 
 
@@ -39,7 +39,7 @@ $sample = Get-Counter -Counter $counters
 $sample.CounterSamples | Select-Object -Property Path,CookedValue,Timestamp | Format-Table -AutoSize
 
 #By creating a server list, we can execute our collection against multiple machines
-$srvrs = @('HIKARU','MISA')
+$srvrs = @('HIKARUDC','PICARD')
 $samples=@()
 
 foreach($srvr in $srvrs){
@@ -51,6 +51,7 @@ foreach($srvr in $srvrs){
 	}
 }
 
+$samples | Select-Object -Property Path,CookedValue,Timestamp
 
 #-------------------------------------------------------------
 #This was a simple script I used to mass convert RedGate Backup files to native.
@@ -62,6 +63,7 @@ foreach($x in $files){
 	.\SQBConverter.exe $old $new
 	}
 
+#-------------------------------------------------------------
 #You can use loops to selectively move files from one server to another
 #this script moves all of Server A's transaction log backups to server B
 $source = 'ServerA'

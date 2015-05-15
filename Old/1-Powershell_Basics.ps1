@@ -149,11 +149,11 @@ Get-Help about_pipelines
 (Get-ChildItem C:\) | Get-Member
 
 #We can also use it for performing an action on a object
-dir C:\DBFiles\backups\backups\*.trn
-dir C:\DBFiles\backups\backups\*.trn | Remove-Item -WhatIf
+dir \\PICARD\C$\backups\dummy\*.trn
+dir \\PICARD\C$\backups\dummy\*.trn | Remove-Item -WhatIf
 
 #We can use the pipeline to further enhance our actions
-dir C:\DBFiles\backups\backups\ -Recurse | Where-Object {$_.Extension  -eq ".trn" -and $_.LastWriteTime -lt (Get-Date).AddDays(-3)} | rm -WhatIf
+dir \\PICARD\C$\backups\ -Recurse | Where-Object {$_.Extension  -eq ".trn" -and $_.LastWriteTime -lt (Get-Date).AddDays(-1)} | rm -WhatIf
 
 #$_ means the current object in the pipeline.  In the above example, we want to reference the Extension and LastWriteTime properties for the current object
 
@@ -252,7 +252,7 @@ get-help about_throw
 
 
 try{ #the inital thing we try to do
-    "This is a code block" |
+    "This is a code block" | Out-Host
     throw (Write-warning "Then an Error happens....")
 }
 catch{ #What happens with an error
@@ -273,7 +273,7 @@ $wmi.Domain
 
 #We can format output in a couple different ways.  Table and list are the most commonly used options
 $wmi | Format-List
-$wmi | Format-Table
+$wmi | Format-Table -AutoSize
 
 #Note that the object doesn't display everything available.  We can control this with Select-Object.
 $wmi | Select-Object Name,Domain,TotalPhysicalMemory,NumberOfProcessors,Model | Format-List

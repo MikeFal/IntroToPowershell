@@ -4,6 +4,7 @@
 
 #now call the script
 C:\IntroToPowershell\5a-FileCount.ps1 'C:\IntroToPowershell\'
+C:\IntroToPowershell\5a-FileCount.ps1 'notvalid'
 
 #We can convert the script to a function call for better reuse
 #open 5b-FileCount_Function.ps1
@@ -20,6 +21,7 @@ function Get-FreeSpace{
 }
 
 Get-FreeSpace PICARD
+Get-FreeSpace localhost
 
 #They can get pretty advanced
 #load assemblies
@@ -78,7 +80,7 @@ notepad $profile
 . $profile
 
 #now we can use the added function
-Expand-SqlLogFile -DatabaseName corruptme -LogSizeMB 24000
+Expand-SqlLogFile -InstanceName PICARD -DatabaseName corruptme -LogSizeMB 12000
 
 #Working with modules
 #We can get a listing of all our available modules

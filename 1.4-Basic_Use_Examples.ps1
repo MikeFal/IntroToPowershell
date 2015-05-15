@@ -1,7 +1,25 @@
-﻿#basic Powershell use
+﻿#already looked at deleting specific old files
+dir '\\PICARD\C$\Backups' -Recurse | `
+Where-Object {$_.Extension  -eq ".trn" -and $_.LastWriteTime -lt (Get-Date).AddHours(-3)} |`
+Remove-Item -WhatIf
 
-#already looked at deleting specific old files
-dir C:\DBFiles\backups\backups\ -Recurse | Where-Object {$_.Extension  -eq ".trn" -and $_.LastWriteTime -lt (Get-Date).AddDays(-3)} | rm -WhatIf
+#Powershell can interface with .Net libraries, COM objects, other functionality.
+#For example, we can use Powershell to interact directly with the WMI
+$wmi=Get-WmiObject -Class Win32_ComputerSystem
+$wmi | Get-Member
+
+$wmi.NumberOfProcessors
+$Wmi.NumberOfLogicalProcessors
+$wmi.Domain
+
+#We can format output in a couple different ways.  Table and list are the most commonly used options
+$wmi | Format-List
+$wmi | Format-Table -AutoSize
+
+#Note that the object doesn't display everything available.  We can control this with Select-Object.
+$wmi | Select-Object Name,Domain,TotalPhysicalMemory,NumberOfProcessors,Model | Format-List
+
+$wmi | Select-Object Name,Domain,TotalPhysicalMemory,NumberOfProcessors,Model | Format-Table -AutoSize
 
 #-------------------------------------------------------------
 #We can use Get-Service to find our SQL Server services
@@ -11,7 +29,7 @@ Get-Service -computername PICARD *SQL*
 Get-Service -computername PICARD *SQL* | Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
 
 #stop the service so it will cause an alert
-Stop-Service -computername PICARD MSSQLSERVER -force
+Invoke-Command -ComputerName PICARD -scriptblock {Stop-Service MSSQLSERVER -force}
 
 #So it doesn't take much more to write a script to alert us if SQL Server isn't running
 $svcs =Get-Service -computername PICARD *SQL* | Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
@@ -23,9 +41,12 @@ if($count -gt 0){
 
 #We could get even more clever and start all the services from that object
 foreach($svc in $svcs){
-    Start-Service -computername PICARD $svc
+    $svccmd = [ScriptBlock]::Create('Start-Service ' + $svc.Name)
+    Invoke-Command -ComputerName PICARD -scriptblock $svccmd
 }
 
+#Quick cheat, we have to restart the agent service
+Invoke-Command -ComputerName PICARD -scriptblock {Start-Service SQLSERVERAGENT}
 
 #-------------------------------------------------------------
 #Using Powershell to collect perfmon info
@@ -54,40 +75,25 @@ foreach($srvr in $srvrs){
 $samples | Select-Object -Property Path,CookedValue,Timestamp
 
 #-------------------------------------------------------------
-#This was a simple script I used to mass convert RedGate Backup files to native.
-$files = ls X:\Backups *_RG*
-
-foreach($x in $files){
-	$old = $x.DirectoryName +"\" + $x.Name
-	$new = $x.DirectoryName +"\" + $x.Name.Replace("_RG","")
-	.\SQBConverter.exe $old $new
-	}
-
-#-------------------------------------------------------------
 #You can use loops to selectively move files from one server to another
 #this script moves all of Server A's transaction log backups to server B
-$source = 'ServerA'
-$target = 'ServerB'
-$dirs = ls \\$source\backups | where {$_.Name -ne $source}
+$source = 'PICARD'
+$target = 'RIKER'
+$dirs = ls \\$source\C$\backups | where {$_.Name -ne $source}
 foreach($dir in $dirs){
-    if(!(Test-Path -Path \\$target\backups\$dir\transactionlogs)){New-Item -ItemType Directory -Path \\$target\backups\$dir\transactionlogs}
-    robocopy \\$source\backups\$dir\transactionlogs \\$target\backups\$dir\transactionlogs
+    if(!(Test-Path -Path \\$target\C$\backups\$dir)){New-Item -ItemType Directory -Path \\$target\C$\backups\$dir}
+    robocopy \\$source\C$\backups\$dir \\$target\C$\backup\$dir
+}
+
+#Clean up the copy
+foreach($dir in $dirs){
+    if(Test-Path -Path \\$target\C$\backups\$dir){Remove-Item -Path \\$target\C$\backups\$dir -Recurse -Force}
 }
 
 
 #-------------------------------------------------------------
-#We can use some simple commands to build out restore statements for transaction logs
-$path = 'C:\DBFiles\backups\backups'
-$files = ls $path\*.trn | Sort-Object -Property lastwritetime
-$out = @()
-foreach($file in $files){
-    $out += "RESTORE LOG [Vault_Xero] FROM DISK='W:\MSSQL\Backups\Vault_Xero\TransactionLogs\" + $file.name + "' WITH NORECOVERY"
-}
-
-$out | Out-File -FilePath C:\TEMP\restorelogs.sql
-
-
 #If you have a cluster, you can use the commands to create directories (or other work) on each node consistently
+#EXAMPLE ONLY, WON'T RUN - We'll deal with clusters later
 Import-Module FailoverClusters
 $cname = (Get-Cluster -name 'ServerA').name
 $nodes = (get-clusternode -Cluster $cname).name

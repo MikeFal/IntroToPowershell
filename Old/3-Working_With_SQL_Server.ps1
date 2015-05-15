@@ -25,7 +25,7 @@ foreach($instance in $instances){
 $out[0].GetType().Name
 
 #Load the SQL Server Powershell module
-Import-Module sqlps -DisableNameChecking
+Import-Module sqlps -verbose #-DisableNameChecking
 
 #What's available to us?
 Get-Command -Module sqlps
@@ -132,7 +132,7 @@ foreach($server in $servers){
     }
 }
 
-dir '\\PICARD\C$\DBFiles\Backups'
+dir '\\PICARD\C$\DBFiles\Backups' -recurse
 
 #SMO
 #Powershell can acess the .NET SMO libraries
@@ -156,9 +156,9 @@ $sysjobs.Script()
 #we can now make collections
 rm C:\IntroToPowershell\logins.sql
 $logins= $smoserver.Logins
-foreach($login in $logins) {$login.Script() >> C:\PowershellDemo\logins.sql}
+foreach($login in $logins) {$login.Script() >> C:\IntrotoPowershell\logins.sql}
 
-notepad C:\PowershellDemo\logins.sql
+notepad C:\IntrotoPowershell\logins.sql
 
 #we can also create objects
 #this is a little trickier

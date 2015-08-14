@@ -20,7 +20,7 @@ foreach ($server in $servers)
 dir 'SQLSERVER:\SQLRegistration\Central Management Server Group\PICARD'
 
 #Configure SQL Server with the SMO:
-$smosrv = New-Object ('Microsoft.SqlServer.Management.Smo.Database') 'PICARD'
+$smosrv = New-Object ('Microsoft.SqlServer.Management.Smo.Server') 'PICARD'
 
 $smosrv.Configuration.MaxServerMemory.ConfigValue = 512
 $smosrv.Configuration.DefaultBackupCompression.ConfigValue = 1

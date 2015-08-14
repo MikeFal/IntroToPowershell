@@ -13,7 +13,7 @@ group by sp.name
 sqlcmd -S PICARD -d tempdb -Q $sql
 
 #Multi-instance execution
-cls
+Clear-Host
 $instances = @('PICARD','RIKER')
 foreach($instance in $instances){
    "Instance: $instance"
@@ -34,7 +34,7 @@ Get-Command -Module sqlps | Measure-Object |Select Count
 #And we can use Get-Help to get more info
 Get-Help Invoke-Sqlcmd -ShowWindow
 
-cls
+Clear-Host
 foreach($instance in $instances){
    "Instance: $instance"
    $ISout=Invoke-Sqlcmd -ServerInstance $instance -Query $sql 
@@ -57,18 +57,32 @@ foreach ($db in $dbs.name){
 cd c:\
 dir '\\PICARD\C$\Backups'
 
-#SQL Provider
+#Providers and the SQL Provider
 #--------------------------------------
-#By loading SQLPS,we also load the SQL Server Provider
-cls
+Clear-Host
+
 Get-PSDrive
+
+Get-PSDrive C | Get-Member
+
+Get-PSDrive ENV | Get-Member
+
+cd ENV:\ #Same as 'Set-Location ENV:\'
+dir 
+
+dir HKLM:\SOFTWARE
+
+#we can easily refer to provider elements in some cases
+$env:COMPUTERNAME
+$env:UserName
+$env:PATH
 
 #Change to the SQL Server Provider
 CD SQLSERVER:\
 dir
 
 #We can browse our SQL Servers as if they were directories
-cls
+Clear-Host
 CD SQL\PICARD\
 dir
 
@@ -95,6 +109,7 @@ dir logins -Force| Select-Object name,defaultdatabase
 foreach($dblogin in $dblogins){
     if($dblogin.issystemobject -eq $false){
         $dblogin.defaultdatabase = 'tempdb'
+        $dblogin.Alter()
     }
 }
 
@@ -104,6 +119,7 @@ dir logins -Force| Select-Object name,defaultdatabase
 foreach($dblogin in $dblogins){
     if($dblogin.issystemobject -eq $false){
         $dblogin.defaultdatabase = 'master'
+        $dblogin.Alter()
     }
 }
 

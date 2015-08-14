@@ -20,7 +20,7 @@ $sysjobs.Script()
 #we can now make collections
 if(Test-Path C:\IntroToPowershell\logins.sql) {Remove-Item C:\IntroToPowershell\logins.sql}
 $logins= $smoserver.Logins
-foreach($login in $logins) {$login.Script() | Out-File C:\IntrotoPowershell\logins.sql}
+foreach($login in $logins) {$login.Script() | Out-File C:\IntrotoPowershell\logins.sql -Append}
 
 notepad C:\IntrotoPowershell\logins.sql
 

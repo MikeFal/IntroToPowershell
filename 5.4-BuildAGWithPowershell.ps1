@@ -6,7 +6,7 @@ $StartTime = Get-Date
 
 #Create FailoverCluster
 Import-Module FailoverClusters
-New-Cluster -Name 'NC1701' -StaticAddress '192.168.10.100' -NoStorage -Node @('KIRK','SPOCK') | Set-ClusterQuorum -FileShareWitness '\\hikarudc\qwitness'
+New-Cluster -Name 'NCC1701' -StaticAddress '192.168.10.100' -NoStorage -Node @('KIRK','SPOCK') | Set-ClusterQuorum -FileShareWitness '\\hikarudc\qwitness'
 
 Start-Sleep -Seconds 60
 

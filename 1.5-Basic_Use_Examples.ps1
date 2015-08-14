@@ -19,14 +19,17 @@ $wmi | Format-Table -AutoSize
 #Note that the object doesn't display everything available.  We can control this with Select-Object.
 $wmi | Select-Object Name,Domain,TotalPhysicalMemory,NumberOfProcessors,Model | Format-List
 
-$wmi | Select-Object Name,Domain,TotalPhysicalMemory,NumberOfProcessors,Model | Format-Table -AutoSize
+$wmi | Select-Object Name,Domain,TotalPhysicalMemory/1GB,NumberOfProcessors,Model | Format-Table -AutoSize
+$wmi.TotalPhysicalMemory/1GB
+
 
 #-------------------------------------------------------------
 #We can use Get-Service to find our SQL Server services
 Get-Service -computername PICARD *SQL*
 
 #What if we want to do a check for any SQL Server services not running?
-Get-Service -computername PICARD *SQL* | Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
+Get-Service -computername PICARD *SQL* | 
+    Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
 
 #stop the service so it will cause an alert
 Invoke-Command -ComputerName PICARD -scriptblock {Stop-Service MSSQLSERVER -force}
@@ -79,7 +82,7 @@ $samples | Select-Object -Property Path,CookedValue,Timestamp
 #this script moves all of Server A's transaction log backups to server B
 $source = 'PICARD'
 $target = 'RIKER'
-$dirs = ls \\$source\C$\backups | where {$_.Name -ne $source}
+$dirs = Get-ChildItem \\$source\C$\backups | where {$_.Name -ne $source}
 foreach($dir in $dirs){
     if(!(Test-Path -Path \\$target\C$\backups\$dir)){New-Item -ItemType Directory -Path \\$target\C$\backups\$dir}
     robocopy \\$source\C$\backups\$dir \\$target\C$\backup\$dir

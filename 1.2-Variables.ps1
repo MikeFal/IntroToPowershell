@@ -56,6 +56,9 @@ $temperature = 'Hot'
 "Tea. Earl Grey. `$temperature."
 
 #cmdlets and functions will output objects.  You can work with them by using ()
+$GCIDemo = Get-ChildItem C:\Windows
+$GCIDemo.Length
+
 (Get-ChildItem C:\Windows).Length
 
 (Get-Date).AddDays(-3)
@@ -80,4 +83,5 @@ $commandarray -join ';'
 #you can separate a string into an array with -split
 $splitstring = 'Kirk,McCoy,Spock,Scott' -split ','
 $splitstring
+$splitstring | gm
 $splitstring.Count

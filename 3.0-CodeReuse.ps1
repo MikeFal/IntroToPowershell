@@ -4,13 +4,21 @@
 
 #now call the script
 C:\IntroToPowershell\3.1-FileCount.ps1 'C:\IntroToPowershell\'
-C:\IntroToPowershell\3.1-FileCount.ps1 'notvalid'
+C:\IntroToPowershell\3.1-FileCount.ps1 -PathName 'notvalid'
 
 #We can convert the script to a function call for better reuse
 #open 3.2-FileCount_Function.ps1
 C:\IntroToPowershell\3.2-FileCount_Function.ps1 'C:\IntroToPowershell\'
 
-#funcations can be extremely useful for code reuse.  For example, if we re-wrote our code for getting a free space report:
+#We can also write our own modules to extend Powershell
+#let's take our file count function, open 5c-FileCount_module.psm1
+#once we import it, we can re-use it
+Import-Module C:\IntroToPowershell\3.3-FileCount_module.psm1
+
+Get-FileCount 'C:\IntroToPowershell\'
+Get-FileCount 'Not Valid'
+
+#functions can be extremely useful for code reuse.  For example, if we re-wrote our code for getting a free space report:
 
 function Get-FreeSpace{
     param([string] $hostname = ($env:COMPUTERNAME))
@@ -22,14 +30,6 @@ function Get-FreeSpace{
 
 Get-FreeSpace PICARD
 Get-FreeSpace localhost
-
-#We can also write our own modules to extend Powershell
-#let's take our file count function, open 5c-FileCount_module.psm1
-#once we import it, we can re-use it
-Import-Module C:\IntroToPowershell\3.3-FileCount_module.psm1
-
-Get-FileCount 'C:\IntroToPowershell\'
-Get-FileCount 'Not Valid'
 
 #We can get a listing of all our available modules
 Get-Module -ListAvailable

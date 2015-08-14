@@ -39,7 +39,6 @@ $out | Where-Object {$_.StartupTime -ne $null} | Format-Table
 
 $CMS='PICARD'
 $servers=@((dir "SQLSERVER:\SQLRegistration\Central Management Server Group\$CMS").Name)
-
 $servers+=$cms
 Test-SQLConnection -Instances $servers
 

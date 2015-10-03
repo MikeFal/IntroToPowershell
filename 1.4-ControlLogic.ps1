@@ -9,7 +9,7 @@ Get-Help about_operators
 
 #For multiple conditions, use -and and -or
 '1 -eq 1 -or 1 -gt 2 returns:' + (1 -eq 1 -or 1 -gt 2)
-'1 -eq 1 -and 1 -lt 2 returns:' + (1 -eq 1 -and 1 -gt 2)
+'1 -eq 1 -and 1 -gt 2 returns:' + (1 -eq 1 -and 1 -gt 2)
 
 #Powershell also has control flow structures that you can use
 #if(){

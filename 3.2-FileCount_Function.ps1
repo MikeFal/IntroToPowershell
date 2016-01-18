@@ -1,6 +1,4 @@
-﻿param($arg)
-
-function Get-FileCount{
+﻿function Get-FileCount{
 
     param([string]$PathName)
 
@@ -12,5 +10,3 @@ function Get-FileCount{
         Write-Warning "Path is invalid"
     }
 }
-
-Get-FileCount -PathName $arg

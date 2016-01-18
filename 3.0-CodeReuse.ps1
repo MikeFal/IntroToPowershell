@@ -8,7 +8,10 @@ C:\IntroToPowershell\3.1-FileCount.ps1 -PathName 'notvalid'
 
 #We can convert the script to a function call for better reuse
 #open 3.2-FileCount_Function.ps1
-C:\IntroToPowershell\3.2-FileCount_Function.ps1 'C:\IntroToPowershell\'
+. C:\IntroToPowershell\3.2-FileCount_Function.ps1
+
+Get-FileCount 'C:\IntroToPowershell\'
+Remove-Item Function:\Get-FileCount
 
 #We can also write our own modules to extend Powershell
 #let's take our file count function, open 5c-FileCount_module.psm1

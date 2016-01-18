@@ -15,50 +15,29 @@ sqlcmd -S PICARD -d tempdb -Q $sql
 #Multi-instance execution
 Clear-Host
 $instances = @('PICARD','RIKER')
-foreach($instance in $instances){
-   "Instance: $instance"
-   $out=sqlcmd -S $instance -Q $sql 
-   $out |Format-Table -AutoSize
-}
+$instances | ForEach-Object {"Instance:$_";sqlcmd -S $_ -Q $sql;"`n"}
 
-#What kind of output is this?
-$out[0].GetType().Name
+#Let's look at SQLPS
+#Where does the module live?
+Get-Module -ListAvailable *SQL*
 
-#Load the SQL Server Powershell module
-Import-Module sqlps -verbose #-DisableNameChecking
+#Lets look in that location and check out some of the files.
+dir 'C:\Program Files (x86)\Microsoft SQL Server\120\Tools\PowerShell\Modules\SQLPS'
 
-#What's available to us?
-Get-Command -Module sqlps
-Get-Command -Module sqlps | Measure-Object |Select Count
+powershell_ise 'C:\Program Files (x86)\Microsoft SQL Server\120\Tools\PowerShell\Modules\SQLPS\SQLPS.PS1'
+powershell_ise 'C:\Program Files (x86)\Microsoft SQL Server\120\Tools\PowerShell\Modules\SQLPS\SqlPsPostScript.PS1'
 
-#And we can use Get-Help to get more info
-Get-Help Invoke-Sqlcmd -ShowWindow
 
-Clear-Host
-foreach($instance in $instances){
-   "Instance: $instance"
-   $ISout=Invoke-Sqlcmd -ServerInstance $instance -Query $sql 
-   $ISout |ft -AutoSize
-}
+#Cool, now load the module
+Import-Module SQLPS
 
-$ISout | Get-Member
-
-#We can use Invoke-Sqlcmd almost like sqlcmd, but since we have a data row we can use it to easily drive other functionality
-$instance = 'PICARD'
-$dbs = Invoke-SqlCmd -ServerInstance $instance -Query "select name from sys.databases where database_id in (1,3,4)"
-if(!(Test-Path '\\PICARD\C$\Backups')){New-Item -ItemType Directory -Path '\\PICARD\C$\Backups'}
-
-foreach ($db in $dbs.name){
-    $dbname = $db.TrimEnd()
-    $sql = "BACKUP DATABASE $dbname TO DISK='C:\Backups\$instance-$dbname.bak' WITH COMPRESSION,INIT"
-    Invoke-SqlCmd -ServerInstance $instance -Query  $sql
-}
-
-cd c:\
-dir '\\PICARD\C$\Backups'
+#What's that warning?
+Import-Module SQLPS -Verbose
+Import-Module SQLPS -DisableNameChecking
 
 #Providers and the SQL Provider
 #--------------------------------------
+
 Clear-Host
 
 Get-PSDrive
@@ -96,6 +75,9 @@ $dbout | gm
 $dbout | where {$_.readonly -eq $false}
 
 $dbout | select name,createdate,@{name='DataSizeMB';expression={$_.dataspaceusage/1024}} | Format-Table -AutoSize
+
+#How does this show up in SQL Server?
+#Let's go look at an XE session (Go into SSMS)
 
 #let's work with logins
 $dblogins = dir logins 
@@ -140,28 +122,12 @@ dir databases
 CD "SQLSERVER:\SQLRegistration\Central Management Server Group\PICARD"
 dir
 
-#we can see all the servers in our CMS
-#gonna clean up the directory first
-dir 'C:\Backups' -Recurse | rm -Recurse -Force
-
-#nothing up my sleeve
-dir 'C:\Backups' -recurse
-
-#now let's use it to run all our systemdb backups
-cd C:\
+#With the right approach, we can query across servers.
 $servers= @((dir "SQLSERVER:\SQLRegistration\Central Management Server Group\PICARD").Name)
 $servers += 'PICARD'
 
-foreach($server in $servers){
-    
-    $dbs = Invoke-SqlCmd -ServerInstance $server -Query "select name from sys.databases where database_id in (1,3,4)"
-    $pathname= "\\HIKARUDC\Backups\"+$server.Replace('\','_')
-    if(!(test-path $pathname)){New-Item $pathname -ItemType directory } 
-    foreach ($db in $dbs.name){
-        $dbname = $db.TrimEnd()
-        $sql = "BACKUP DATABASE $dbname TO DISK='$pathname\$dbname.bak' WITH COMPRESSION,INIT"
-        Invoke-SqlCmd -ServerInstance $server -Query  $sql
-    }
-}
+#Check your SQL Server versions
+$servers | ForEach-Object {Get-Item “SQLSERVER:\SQL\$_\DEFAULT”} | Select-Object Name,VersionString
 
-dir 'C:\Backups' -recurse
+#Report on all your databases
+$servers | ForEach-Object {dir SQLSERVER:\SQL\$_\DEFAULT\DATABASES} | select @{n='Server';e={$_.Parent.Name}},name,createdate,@{name='DataSizeMB';expression={$_.dataspaceusage/1024}} | Format-Table -AutoSize

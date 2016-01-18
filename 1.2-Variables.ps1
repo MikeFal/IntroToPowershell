@@ -70,6 +70,7 @@ $GCIDemo.Length
 $commands = Get-Command 'New*'
 $commands.GetType()
 $commands[0].GetType().ToString()
+$commands | gm
 $commands.Count
 
 $commands[5] | gm
@@ -80,7 +81,7 @@ $commandarray
 
 #You can merge and array with -Join
 $commandarray -join ';'
-$commandarray -join "`n"
+($commandarray -join "`n").GetType()
 
 #you can separate a string into an array with -split
 $splitstring = 'Kirk,McCoy,Spock,Scott' -split ','
@@ -88,3 +89,5 @@ $splitstring
 $splitstring | gm
 $splitstring.GetType()
 $splitstring.Count
+
+[string[]]$stringarray = @('Make','It','So')

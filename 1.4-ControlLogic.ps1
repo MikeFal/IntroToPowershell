@@ -51,7 +51,7 @@ cls
 dir C:\TEMP
 
 #You can deal with all the files as a collection
-$tempfiles = dir C:\TEMP\ | where {$_.LastWriteTime}
+$tempfiles = dir C:\TEMP\ 
 foreach($item in $tempfiles){
     $item | Remove-Item
 }

@@ -63,7 +63,7 @@ $sample = Get-Counter -Counter $counters
 $sample.CounterSamples | Select-Object -Property Path,CookedValue,Timestamp | Format-Table -AutoSize
 
 #By creating a server list, we can execute our collection against multiple machines
-$srvrs = @('HIKARUDC','PICARD')
+$srvrs = @('PIKE','PICARD')
 $samples=@()
 
 foreach($srvr in $srvrs){

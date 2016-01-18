@@ -3,9 +3,8 @@
     built and configured with name and networking.
 #>
 $pw='vanh0uten!42' | ConvertTo-SecureString -AsPlainText -force
-$cred = New-Object System.Management.Automation.PSCredential ('SDF\Administrator',$pw)
-Add-Computer -DomainName 'SDF.local' -Credential $cred -NewName WORF
-restart-computer
+$cred = New-Object System.Management.Automation.PSCredential ('STARFLEET\Administrator',$pw)
+Add-Computer -DomainName 'starfleet.com' -Credential $cred -NewName WORF -Restart
 
 #POST SERVER INIT, BASE CONFIGURATION
 #configure powershell as default shell
@@ -28,4 +27,4 @@ New-Item -ItemType Directory -Path C:\DBFiles\Log -Force | ft
 New-Item -ItemType Directory -Path C:\DBFiles\TempDB -Force | ft
 
 #install SQL Server
-\\HIKARUDC\InstallFiles\SQLServer\SQL2014\setup.exe /CONFIGURATIONFILE='\\HIKARUDC\InstallFiles\SQLServer\\SQL2014_Core.ini'
+E:\setup.exe /CONFIGURATIONFILE='\\PIKE\InstallFiles\SQL2014_Core.ini'

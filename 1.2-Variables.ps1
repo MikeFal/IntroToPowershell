@@ -8,6 +8,7 @@ $string
 
 #We can use Get-Member to find out all the information on our objects
 $string | Get-Member
+($string | Get-Member).TypeName
 
 #Powershell is strongly typed and uses .Net objects.
 #Not just limited to strings and intgers

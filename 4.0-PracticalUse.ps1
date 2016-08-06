@@ -22,8 +22,6 @@ function Test-SQLConnection{
 
 Test-SQLConnection -Instances 'PICARD'
 
-#Now let's load the module
-Import-Module SQLCheck
 
 #Now that function is available to us as if
 Test-SQLConnection -Instances @('PICARD','RIKER','NotAValidServer')
@@ -49,7 +47,7 @@ function Export-SQLDacPacs{
         )
 
 #get the sqlpackage executable
-$sqlpackage = get-childitem 'C:\Program Files (x86)\Microsoft SQL Server\120\DAC\bin\sqlpackage.exe'
+$sqlpackage = get-childitem 'C:\Program Files (x86)\Microsoft SQL Server\130\DAC\bin\sqlpackage.exe'
 
 #declare a select query for databases
 $dbsql = @"

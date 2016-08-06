@@ -34,11 +34,12 @@ Get-Help about_Switch
 #Use If to check for things, like if a file or directory exists (and what to do if it doesn't)
 New-Item -ItemType Directory -Path 'C:\TEMP'
 
-If((Test-Path 'C:\TEMP') -eq $false){New-Item -ItemType Directory -Path 'C:\TEMP'}
+If((Test-Path 'C:\TEMP') -eq $false){
+    New-Item -ItemType Directory -Path 'C:\TEMP'
+}
 
 Remove-Item -Recurse 'C:\TEMP'
 If((Test-Path 'C:\TEMP') -eq $false){New-Item -ItemType Directory -Path 'C:\TEMP'}
-
 
 #while or until do things based on their conditions
 #do is sytnax that allows you to put the while/until at the end of the loop instead of the beginning
@@ -50,13 +51,23 @@ while($x -lt 10){
 cls
 dir C:\TEMP
 
-#You can deal with all the files as a collection
-$tempfiles = dir C:\TEMP\ 
-foreach($item in $tempfiles){
-    $item | Remove-Item
+#We can also use for loops
+for($y=0;$y -lt 10;$y++){
+    New-Item -ItemType File -Path "C:\TEMP\ForJunk$y.txt"
 }
 cls
 dir C:\TEMP
+
+#You can deal with all the files as a collection
+$files = dir C:\TEMP\ 
+foreach($file in $files){
+     Move-Item $file.FullName ($file.FullName -replace "txt","log")
+}
+#cls
+dir C:\TEMP
+
+#cleanup
+dir C:\Temp | Remove-Item -Confirm
 
 #Create an error
 $x = 1/0
@@ -66,6 +77,7 @@ $Error[0]
 $Error[0] | gm
 
 #Try/Catch/Finally allow us to better handle errors
+#Note that when we use catch, the red text doesn't show up.
 cls
 $x = 1
 try{
@@ -79,3 +91,25 @@ finally{
 }
 
 "`$x is $x"
+
+#We can use throw or Write-Error to generate error messages
+Write-Error "Something is wrong on the holodeck!"
+
+throw "Something else is wrong on the holodeck!!"
+
+#Write-Error does not respect Try/Catch and will immediately return an error message
+#throw respects Try/Catch
+
+try{
+    Write-Error "Something is wrong on the holodeck!"
+}
+catch{
+    Write-Warning "Something happened"
+}
+
+try{
+    throw "Something else is wrong on the holodeck!!"
+}
+catch{
+    Write-Warning "Something happened"
+}

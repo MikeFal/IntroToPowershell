@@ -32,7 +32,11 @@ Get-Service -computername PICARD *SQL* |
     Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
 
 #stop the service so it will cause an alert
+#We can't use Start-Service and Stop-Service remotely as is, we need to use Invoke-Command to run commands remotely
 Invoke-Command -ComputerName PICARD -scriptblock {Stop-Service MSSQLSERVER -force}
+
+Get-Service -computername PICARD *SQL* | 
+    Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
 
 #So it doesn't take much more to write a script to alert us if SQL Server isn't running
 $svcs =Get-Service -computername PICARD *SQL* | Where-Object {$_.Status -ne 'Running' -and $_.Name -like 'MSSQL*'}
@@ -96,12 +100,11 @@ foreach($dir in $dirs){
 
 #-------------------------------------------------------------
 #If you have a cluster, you can use the commands to create directories (or other work) on each node consistently
-#EXAMPLE ONLY, WON'T RUN - We'll deal with clusters later
 Import-Module FailoverClusters
-$cname = (Get-Cluster -name 'ServerA').name
+$cname = (Get-Cluster -name 'PICARD').name
 $nodes = (get-clusternode -Cluster $cname).name
 
 foreach($node in $nodes){
     "Connecting to $node"
-    sqlcmd -S $node -d msdb 'ALTER DATABASE [model] SET RECOVERY SIMPLE;'
+    sqlcmd -S $node -d tempdb -Q 'ALTER DATABASE [model] SET RECOVERY SIMPLE;'
 }

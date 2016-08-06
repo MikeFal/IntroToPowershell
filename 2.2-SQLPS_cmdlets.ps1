@@ -3,13 +3,13 @@
 Get-Command -Module SQLPS
 Get-Command -Module SQLPS | Measure-Object
 
-Get-SqlDatabase -ServerInstance PICARD -Name AdventureWorks2014
+Get-SqlDatabase -ServerInstance PICARD -Name WideWorldImporters | GM
 
 Get-SqlInstance -MachineName PICARD
 
-Backup-SqlDatabase -ServerInstance PICARD -Database AdventureWorks2014  -BackupFile 'C:\TEMP\AdventureWorks2014.bak' -Initialize -CopyOnly -Script
+Backup-SqlDatabase -ServerInstance PICARD -Database WideWorldImporters  -BackupFile 'C:\TEMP\AdventureWorks2014.bak' -Initialize -CopyOnly -Script
 
-Backup-SqlDatabase -ServerInstance PICARD -Database AdventureWorks2014  -BackupFile 'C:\TEMP\AdventureWorks2014.bak' -Initialize -CopyOnly
+Backup-SqlDatabase -ServerInstance PICARD -Database WideWorldImporters  -BackupFile 'C:\TEMP\AdventureWorks2014.bak' -Initialize -CopyOnly
 
 #Lets combine the Backup-SQLDatabase with the provider
 #gonna clean up the directory first

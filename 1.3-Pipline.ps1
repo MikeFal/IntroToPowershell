@@ -13,11 +13,10 @@ New-Item -ItemType Directory -Path 'C:\Test'
 'The quick brown fox jumps over the lazy dog. Again.' | Out-File -FilePath 'C:\Test\Dummy.txt'
 notepad 'C:\Test\Dummy.txt'
 
-#We can also use it for removing things
-New-Item -ItemType file -Path 'C:\Test\Junk1.txt'
-New-Item -ItemType file -Path 'C:\Test\Junk2.txt'
-New-Item -ItemType file -Path 'C:\Test\Junk3.txt'
-New-Item -ItemType file -Path 'C:\Test\Junk4.txt'
+
+#We can also use it for creating and removing things
+$files = @('Junk1.txt','Junk2.txt','Junk3.txt','Junk4.txt')
+$files | ForEach-Object {New-Item -ItemType file -Path "C:\Test\$_"}
 
 cls
 dir C:\Test

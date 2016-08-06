@@ -16,8 +16,7 @@ foreach($db in $dbs.name){
     #Get a nice name and backup your database to it
     $filename = "$db-$datestring.bak"
     $backup=Join-Path -Path $dir -ChildPath $filename
-    $sql = "BACKUP DATABASE $db TO DISK = N'$backup' WITH COMPRESSION"
-    Invoke-Sqlcmd -ServerInstance localhost -Database tempdb -Query $sql -QueryTimeout 6000
+    Backup-SqlDatabase -ServerInstance localhost -Database $db -BackupFile $backup 
     #Delete old backups
     Get-ChildItem $dir\*.bak| Where {$_.LastWriteTime -lt (Get-Date).AddMinutes(-1)}|Remove-Item
 

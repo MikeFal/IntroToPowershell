@@ -12,6 +12,11 @@ Get-Help Get-Command -Online
 #More than just cmdlets, we also have topics
 get-help about*
 
+#Practical use
+Get-Command 'New*Firewall*'
+
+Get-Help New-NetFirewallRule -ShowWindow
+
 #To find out the current time, use Get-Date
 Get-Date
 

@@ -10,7 +10,7 @@ from sys.server_principals sp
 join sys.databases d on (sp.sid = d.owner_sid)
 group by sp.name
 "
-sqlcmd -S PICARD -d tempdb -Q $sql
+sqlcmd -S PICARD -d tempdb -Q $sql | gm
 
 #Multi-instance execution
 Clear-Host
@@ -22,16 +22,16 @@ $instances | ForEach-Object {"Instance:$_";sqlcmd -S $_ -Q $sql;"`n"}
 Get-Module -ListAvailable *SQL*
 
 #Lets look in that location and check out some of the files.
-dir 'C:\Program Files (x86)\Microsoft SQL Server\120\Tools\PowerShell\Modules\SQLPS'
+dir 'C:\Program Files (x86)\Microsoft SQL Server\130\Tools\PowerShell\Modules\SQLPS'
 
-powershell_ise 'C:\Program Files (x86)\Microsoft SQL Server\120\Tools\PowerShell\Modules\SQLPS\SQLPS.PS1'
-powershell_ise 'C:\Program Files (x86)\Microsoft SQL Server\120\Tools\PowerShell\Modules\SQLPS\SqlPsPostScript.PS1'
+powershell_ise 'C:\Program Files (x86)\Microsoft SQL Server\130\Tools\PowerShell\Modules\SQLPS\SQLPS.PS1'
+powershell_ise 'C:\Program Files (x86)\Microsoft SQL Server\130\Tools\PowerShell\Modules\SQLPS\SqlPsPostScript.PS1'
 
 
 #Cool, now load the module
 Import-Module SQLPS
 
-#What's that warning?
+#If you're not using SSMS 2016, you'll probably see an error
 Import-Module SQLPS -Verbose
 Import-Module SQLPS -DisableNameChecking
 
@@ -72,9 +72,9 @@ dir Databases
 dir databases -Force
 $dbout = dir databases -Force
 $dbout | gm
-$dbout | where {$_.readonly -eq $false}
+$dbout | Where-Object {$_.Owner -ne 'sa'}
 
-$dbout | select name,createdate,@{name='DataSizeMB';expression={$_.dataspaceusage/1024}} | Format-Table -AutoSize
+dir databases -Force| select name,createdate,@{name='DataSizeMB';expression={$_.dataspaceusage/1024}} | Format-Table -AutoSize
 
 #How does this show up in SQL Server?
 #Let's go look at an XE session (Go into SSMS)
@@ -127,7 +127,9 @@ $servers= @((dir "SQLSERVER:\SQLRegistration\Central Management Server Group\PIC
 $servers += 'PICARD'
 
 #Check your SQL Server versions
-$servers | ForEach-Object {Get-Item “SQLSERVER:\SQL\$_\DEFAULT”} | Select-Object Name,VersionString
+$servers | ForEach-Object {Get-Item “SQLSERVER:\SQL\$_\DEFAULT”} | Select-Object Name,VersionString,IsClustered,IsHADREnabled
 
 #Report on all your databases
-$servers | ForEach-Object {dir SQLSERVER:\SQL\$_\DEFAULT\DATABASES} | select @{n='Server';e={$_.Parent.Name}},name,createdate,@{name='DataSizeMB';expression={$_.dataspaceusage/1024}} | Format-Table -AutoSize
+$servers | ForEach-Object {dir SQLSERVER:\SQL\$_\DEFAULT\DATABASES} | 
+            Select-Object @{n='Server';e={$_.Parent.Name}},name,createdate,@{name='DataSizeMB';expression={$_.dataspaceusage/1024}},LastBackupDate | 
+            Format-Table -AutoSize

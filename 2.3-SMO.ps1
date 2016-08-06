@@ -1,5 +1,6 @@
 ﻿#SMO
 #Powershell can acess the .NET SMO libraries
+#All the SMO classes are loaded with the module, but if you load them separately you can use the following syntax
 [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | out-null
 
 $smoserver = new-object ('Microsoft.SqlServer.Management.Smo.Server') 'PICARD' 
@@ -18,10 +19,10 @@ $sysjobs.Indexes
 $sysjobs.Script()
 
 #we can now make collections
-if(Test-Path C:\IntroToPowershell\logins.sql) {Remove-Item C:\IntroToPowershell\logins.sql}
-$smoserver.Logins | ForEach-Object {$_.Script() | Out-File C:\IntrotoPowershell\logins.sql -Append}
+if(Test-Path C:\Temp\logins.sql) {Remove-Item C:\Temp\logins.sql}
+$smoserver.Logins | ForEach-Object {$_.Script() | Out-File C:\Temp\logins.sql -Append}
 
-notepad C:\IntrotoPowershell\logins.sql
+notepad C:\Temp\logins.sql
 
 #we can also create objects
 #this is a little trickier

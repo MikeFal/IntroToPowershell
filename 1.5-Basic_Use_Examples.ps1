@@ -1,4 +1,7 @@
-﻿#already looked at deleting specific old files
+﻿#First, clear the screen
+Clear-Host
+
+#already looked at deleting specific old files
 dir '\\PICARD\C$\Backups' -Recurse | 
     Where-Object {$_.Extension  -eq ".trn" -and $_.LastWriteTime -lt (Get-Date).AddHours(-3)} |
     Remove-Item -WhatIf
@@ -92,9 +95,11 @@ foreach($dir in $dirs){
     robocopy \\$source\C$\backups\$dir \\$target\C$\backup\$dir
 }
 
+dir \\$target\C$\backup\ -Recurse
+
 #Clean up the copy
 foreach($dir in $dirs){
-    if(Test-Path -Path \\$target\C$\backups\$dir){Remove-Item -Path \\$target\C$\backups\$dir -Recurse -Force}
+    if(Test-Path -Path \\$target\C$\backup\$dir){Remove-Item -Path \\$target\C$\backup\$dir -Recurse -Force}
 }
 
 

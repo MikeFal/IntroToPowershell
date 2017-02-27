@@ -3,11 +3,11 @@
 #All the SMO classes are loaded with the module, but if you load them separately you can use the following syntax
 [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | out-null
 
-$smoserver = new-object ('Microsoft.SqlServer.Management.Smo.Server') 'PICARD' 
+$smoserver = new-object 'Microsoft.SqlServer.Management.Smo.Server' 'PICARD' 
 
 #We can now interact with the server as it is an object
 $smoserver | Get-Member
-$smoserver.Version
+$smoserver.VersionString
 
 #We can also drilldown into the parts of the server
 $smoserver.Databases

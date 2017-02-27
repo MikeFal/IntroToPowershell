@@ -1,4 +1,7 @@
-﻿#Variables and using variables
+﻿#First, clear the screen
+Clear-Host
+
+#Variables and using variables
 Get-Help about_variables -ShowWindow
 
 #Powershell variables start with a $
@@ -9,6 +12,9 @@ $string
 #We can use Get-Member to find out all the information on our objects
 $string | Get-Member
 ($string | Get-Member).TypeName
+
+$string.Length
+$string.IndexOf('s')
 
 #Powershell is strongly typed and uses .Net objects.
 #Not just limited to strings and intgers
@@ -85,10 +91,8 @@ $commandarray -join ';'
 ($commandarray -join "`n").GetType()
 
 #you can separate a string into an array with -split
-$splitstring = 'Kirk,McCoy,Spock,Scott' -split ','
+$splitstring = 'Kirk,McCoy,Spock,Scotty' -split ','
 $splitstring
 $splitstring | gm
 $splitstring.GetType()
 $splitstring.Count
-
-[string[]]$stringarray = @('Make','It','So')

@@ -1,4 +1,7 @@
-﻿#Start exploring your objects by piping to Get-Member
+﻿#First, clear the screen
+Clear-Host
+
+#Start exploring your objects by piping to Get-Member
 [string]$string ="Earl Grey, hot."
 $string | Get-Member
 

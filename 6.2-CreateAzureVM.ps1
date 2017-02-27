@@ -15,7 +15,7 @@ $pip = New-AzureRmPublicIpAddress -Name 'msftestip' -ResourceGroupName $rgName -
 $nic = New-AzureRmNetworkInterface -Name 'msftestnic' -ResourceGroupName $rgName -Location $locName -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id
 
 #Create storage account, declare VHD storage paths
-$storage = New-AzureRmStorageAccount -ResourceGroupName $rgname -Name 'msfintrotoazurevm' -Type Standard_LRS -Location $locName
+$storage = New-AzureRmStorageAccount -ResourceGroupName $rgname -Name 'introtoazurevm' -Type Standard_LRS -Location $locName
 $OSPath = $storage.PrimaryEndpoints.Blob.ToString() + "vhds/IntroToAzureOSDisk.vhd"
 $DataPath = $storage.PrimaryEndpoints.Blob.ToString() + "vhds/IntroToAzureDataDisk.vhd"
 
@@ -46,3 +46,5 @@ Initialize-Disk -Number 2 -PartitionStyle MBR
 New-Partition -DiskNumber 2 -UseMaximumSize -DriveLetter F
 Format-Volume -DriveLetter F -FileSystem NTFS -NewFileSystemLabel SQLFiles -AllocationUnitSize 65536 -Confirm:$false
 
+#Cleanup
+Remove-AzureRmResourceGroup -Name $rgname -Force

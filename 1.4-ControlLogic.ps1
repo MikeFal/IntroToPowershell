@@ -1,4 +1,7 @@
-﻿#Operators and variable comparison
+﻿#First, clear the screen
+Clear-Host
+
+#Operators and variable comparison
 Get-Help about_operators
 
 #Symbols like '>' and '<' mean different things in standard shell scripting.
@@ -39,7 +42,9 @@ If((Test-Path 'C:\TEMP') -eq $false){
 }
 
 Remove-Item -Recurse 'C:\TEMP'
-If((Test-Path 'C:\TEMP') -eq $false){New-Item -ItemType Directory -Path 'C:\TEMP'}
+If((Test-Path 'C:\TEMP') -eq $false){
+    New-Item -ItemType Directory -Path 'C:\TEMP'
+    }
 
 #while or until do things based on their conditions
 #do is sytnax that allows you to put the while/until at the end of the loop instead of the beginning

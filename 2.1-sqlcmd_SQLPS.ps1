@@ -2,7 +2,6 @@
 #sqlcmd - Just call within the script
 sqlcmd -S PICARD -d tempdb -Q "select count(1) from sys.objects"
 
-#create a script, run it against multiple instances
 $sql="
 SET NOCOUNT ON
 select sp.name,count(1) db_count
@@ -10,30 +9,29 @@ from sys.server_principals sp
 join sys.databases d on (sp.sid = d.owner_sid)
 group by sp.name
 "
-sqlcmd -S PICARD -d tempdb -Q $sql | gm
+sqlcmd -S PICARD -d tempdb -Q $sql
 
 #Multi-instance execution
 Clear-Host
 $instances = @('PICARD','RIKER')
 $instances | ForEach-Object {"Instance:$_";sqlcmd -S $_ -Q $sql;"`n"}
 
-#Let's look at SQLPS
+#Let's look at SQLPS/SQLServer
 #Where does the module live?
 Get-Module -ListAvailable *SQL*
 
 #Lets look in that location and check out some of the files.
-dir 'C:\Program Files (x86)\Microsoft SQL Server\130\Tools\PowerShell\Modules\SQLPS'
+dir 'C:\Program Files\WindowsPowerShell\Modules\SqlServer'
 
-powershell_ise 'C:\Program Files (x86)\Microsoft SQL Server\130\Tools\PowerShell\Modules\SQLPS\SQLPS.PS1'
-powershell_ise 'C:\Program Files (x86)\Microsoft SQL Server\130\Tools\PowerShell\Modules\SQLPS\SqlPsPostScript.PS1'
-
+powershell_ise 'C:\Program Files\WindowsPowerShell\Modules\SqlServer\SqlServer.PS1'
+powershell_ise 'C:\Program Files\WindowsPowerShell\Modules\SqlServer\SqlServerPostScript.PS1'
 
 #Cool, now load the module
-Import-Module SQLPS
+Import-Module SqlServer
 
 #If you're not using SSMS 2016, you'll probably see an error
-Import-Module SQLPS -Verbose
-Import-Module SQLPS -DisableNameChecking
+Import-Module SqlServer -Verbose
+Import-Module SqlServer -DisableNameChecking
 
 #Providers and the SQL Provider
 #--------------------------------------

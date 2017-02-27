@@ -27,4 +27,4 @@ New-Item -ItemType Directory -Path C:\DBFiles\Log -Force | ft
 New-Item -ItemType Directory -Path C:\DBFiles\TempDB -Force | ft
 
 #install SQL Server
-E:\setup.exe /CONFIGURATIONFILE='\\PIKE\InstallFiles\SQL2014_Core.ini'
+E:\setup.exe /CONFIGURATIONFILE='\\PIKE\InstallFiles\2016install.ini' /SQLSVCACCOUNT='STARFLEET\sqlsvc' /SQLSVCPASSWORD='vanh0uten!42' /AGTSVCACCOUNT='STARFLEET\sqlsvc' /AGTSVCPASSWORD='vanh0uten!42' /SAPWD='vanh0uten!42' /IACCEPTSQLSERVERLICENSETERMS

@@ -1,4 +1,7 @@
-﻿#Cmdlets - the core functionality
+﻿#First, clear the screen
+Clear-Host
+
+#Cmdlets - the core functionality
 Get-Command
 Get-Command | Measure-Object #Don't worry about the pipe
 

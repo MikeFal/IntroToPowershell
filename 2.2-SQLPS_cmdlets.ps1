@@ -4,15 +4,15 @@ cd C:\temp
 Get-Command -Module SqlServer
 Get-Command -Module SqlServer | Measure-Object
 
-Get-SqlDatabase -ServerInstance PICARD -Name WideWorldImporters | GM
+Get-SqlDatabase -ServerInstance TARKIN -Name WideWorldImporters | GM
 
-Get-SqlInstance -MachineName PICARD
+Get-SqlInstance -MachineName TARKIN
 
-Backup-SqlDatabase -ServerInstance PICARD -Database WideWorldImporters  -BackupFile 'C:\TEMP\WideWorldImporters.bak' -Initialize -CopyOnly -Script
+Backup-SqlDatabase -ServerInstance TARKIN -Database WideWorldImporters  -BackupFile 'C:\TEMP\WideWorldImporters.bak' -Initialize -CopyOnly -Script
 
-Backup-SqlDatabase -ServerInstance PICARD -Database WideWorldImporters  -BackupFile 'C:\TEMP\WideWorldImporters.bak' -Initialize -CopyOnly
+Backup-SqlDatabase -ServerInstance TARKIN -Database WideWorldImporters  -BackupFile 'C:\TEMP\WideWorldImporters.bak' -Initialize -CopyOnly 
 
-dir \\PICARD\C$\TEMP
+dir \\TARKIN\C$\TEMP
 
 #Lets combine the Backup-SQLDatabase with the provider
 #gonna clean up the directory first
@@ -23,13 +23,13 @@ dir 'C:\Backups' -recurse
 
 #now let's use it to run all our systemdb backups
 cd C:\
-$servers= @((dir "SQLSERVER:\SQLRegistration\Central Management Server Group\PICARD").Name)
-$servers += 'PICARD'
+$servers= @((dir "SQLSERVER:\SQLRegistration\Central Management Server Group\TARKIN").Name)
+$servers += 'TARKIN'
 
 foreach($server in $servers){
     
     $dbs = dir SQLSERVER:\SQL\$server\DEFAULT\DATABASES -Force | Where-Object {$_.IsSystemObject -eq $true -and $_.name -ne 'tempdb'}
-    $pathname= "\\PIKE\Backups\"+$server.Replace('\','_')
+    $pathname= "\\PALPATINE\Backups\"+$server.Replace('\','_')
     if(!(test-path $pathname)){New-Item $pathname -ItemType directory } 
     $dbs | ForEach-Object {Backup-SqlDatabase -ServerInstance $server -Database $_.name -BackupFile "$pathname\$($_.name).bak" -Initialize}
 }
@@ -46,8 +46,8 @@ join sys.databases d on (sp.sid = d.owner_sid)
 group by sp.name
 '@
 
-$sqlcmdout = sqlcmd -S PICARD -d tempdb -Q $sql
-$invokesqlout = Invoke-Sqlcmd -ServerInstance PICARD -Database tempdb -Query $sql
+$sqlcmdout = sqlcmd -S TARKIN -d tempdb -Q $sql
+$invokesqlout = Invoke-Sqlcmd -ServerInstance TARKIN -Database tempdb -Query $sql
 
 $sqlcmdout
 $invokesqlout

@@ -11,7 +11,6 @@ $string
 
 #We can use Get-Member to find out all the information on our objects
 $string | Get-Member
-($string | Get-Member).TypeName
 
 $string.Length
 $string.IndexOf('s')
@@ -42,7 +41,7 @@ $file | gm
 $file.Name
 $file.FullName
 $file.Extension
-$file.LastWriteTime
+$file.LastWriteTime.ToUniversalTime()
 
 Remove-Item $file
 

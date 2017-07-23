@@ -1,6 +1,6 @@
 ﻿#Using SQL CMD
 #sqlcmd - Just call within the script
-sqlcmd -S PICARD -d tempdb -Q "select count(1) from sys.objects"
+sqlcmd -S TARKIN -d tempdb -Q "select count(1) from sys.objects"
 
 $sql="
 SET NOCOUNT ON
@@ -9,11 +9,11 @@ from sys.server_principals sp
 join sys.databases d on (sp.sid = d.owner_sid)
 group by sp.name
 "
-sqlcmd -S PICARD -d tempdb -Q $sql
+sqlcmd -S TARKIN -d tempdb -Q $sql
 
 #Multi-instance execution
 Clear-Host
-$instances = @('PICARD','RIKER')
+$instances = @('TARKIN','VADER')
 $instances | ForEach-Object {"Instance:$_";sqlcmd -S $_ -Q $sql;"`n"}
 
 #Let's look at SQLPS/SQLServer
@@ -21,7 +21,7 @@ $instances | ForEach-Object {"Instance:$_";sqlcmd -S $_ -Q $sql;"`n"}
 Get-Module -ListAvailable *SQL*
 
 #Lets look in that location and check out some of the files.
-dir 'C:\Program Files\WindowsPowerShell\Modules\SqlServer'
+dir 'C:\Program Files\WindowsPowerShell\Modules\SqlServer\21.0.17152'
 
 powershell_ise 'C:\Program Files\WindowsPowerShell\Modules\SqlServer\SqlServer.PS1'
 powershell_ise 'C:\Program Files\WindowsPowerShell\Modules\SqlServer\SqlServerPostScript.PS1'
@@ -60,7 +60,7 @@ dir
 
 #We can browse our SQL Servers as if they were directories
 Clear-Host
-CD SQL\PICARD\
+CD SQL\TARKIN\
 dir
 
 CD DEFAULT
@@ -72,7 +72,8 @@ $dbout = dir databases -Force
 $dbout | gm
 $dbout | Where-Object {$_.Owner -ne 'sa'}
 
-dir databases -Force| select name,createdate,@{name='DataSizeMB';expression={$_.dataspaceusage/1024}} | Format-Table -AutoSize
+dir databases -Force| 
+    select name,createdate,@{name='DataSizeMB';expression={$_.dataspaceusage/1024}} | Format-Table -AutoSize
 
 #How does this show up in SQL Server?
 #Let's go look at an XE session (Go into SSMS)
@@ -109,7 +110,7 @@ dir logins -Force| Select-Object name,defaultdatabase
 New-Item database\poshtest
 
 #So we will need to use traditional methods
-Invoke-Sqlcmd -ServerInstance PICARD -Database tempdb -Query "CREATE DATABASE poshtest"
+Invoke-Sqlcmd -ServerInstance TARKIN -Database tempdb -Query "CREATE DATABASE poshtest"
 dir databases
 
 #But other things do work
@@ -117,12 +118,12 @@ Remove-Item databases\poshtest
 dir databases
 
 #Let's look at the CMS
-CD "SQLSERVER:\SQLRegistration\Central Management Server Group\PICARD"
+CD "SQLSERVER:\SQLRegistration\Central Management Server Group\TARKIN"
 dir
 
 #With the right approach, we can query across servers.
-$servers= @((dir "SQLSERVER:\SQLRegistration\Central Management Server Group\PICARD").Name)
-$servers += 'PICARD'
+$servers= @((dir "SQLSERVER:\SQLRegistration\Central Management Server Group\TARKIN").Name)
+$servers += 'TARKIN'
 
 #Check your SQL Server versions
 $servers | ForEach-Object {Get-Item “SQLSERVER:\SQL\$_\DEFAULT”} | Select-Object Name,VersionString,IsClustered,IsHADREnabled

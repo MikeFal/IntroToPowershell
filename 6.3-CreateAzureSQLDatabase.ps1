@@ -1,7 +1,7 @@
 ﻿#Set variables
 $resourcegroup = 'IntroAzureSQL'
 $location = 'West US'
-$servername = 'msf-sqlintro'
+$servername = 'msf-azugsrv'
 $dbname = 'msf-sqlintrodb'
 $localIP = (Invoke-WebRequest -Uri https://api.ipify.org).Content.trim()
 
@@ -17,7 +17,7 @@ New-AzureRmSqlServer -ResourceGroupName $resourcegroup -Location $location -Serv
 
 #Create Server Firewall rules
 New-AzureRmSqlServerFirewallRule -ResourceGroupName $resourcegroup -ServerName $servername -AllowAllAzureIPs
-New-AzureRmSqlServerFirewallRule -ResourceGroupName $resourcegroup -ServerName $servername -FirewallRuleName 'IntroUserFirewall' -StartIpAddress $localIP -EndIpAddress $localIP
+New-AzureRmSqlServerFirewallRule -ResourceGroupName $resourcegroup -ServerName 'msf-azugsrv' -FirewallRuleName 'AzureGlobalBC' -StartIpAddress $localIP -EndIpAddress $localIP
 
 New-AzureRmSqlDatabase -ResourceGroupName $resourcegroup -ServerName $servername -Edition Basic -DatabaseName $dbname
 

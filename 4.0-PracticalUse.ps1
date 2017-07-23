@@ -20,22 +20,22 @@ function Test-SQLConnection{
     return $return
 }
 
-Test-SQLConnection -Instances 'PICARD'
+Test-SQLConnection -Instances 'TARKIN'
 
 
 #Now that function is available to us as if
-Test-SQLConnection -Instances @('PICARD','RIKER','NotAValidServer')
+Test-SQLConnection -Instances @('TARKIN','VADER','NotAValidServer')
 
 #Cool. Now let's have some fun
 $out = @()
 for($port=1430;$port -le 1440;$port++){
-    $row = Test-SQLConnection -Instances "PICARD,$port" | select InstanceName,StartupTime,@{name='Host';expression={'PICARD'}},@{name='Port';expression={"$port"}}
+    $row = Test-SQLConnection -Instances "TARKIN,$port" | select InstanceName,StartupTime,@{name='Host';expression={'TARKIN'}},@{name='Port';expression={"$port"}}
     $out+=$row
 }
 
 $out | Where-Object {$_.StartupTime -ne $null} | Format-Table
 
-$CMS='PICARD'
+$CMS='TARKIN'
 $servers=@((dir "SQLSERVER:\SQLRegistration\Central Management Server Group\$CMS").Name)
 $servers+=$cms
 Test-SQLConnection -Instances $servers
@@ -47,7 +47,7 @@ function Export-SQLDacPacs{
         )
 
 #get the sqlpackage executable
-$sqlpackage = get-childitem 'C:\Program Files (x86)\Microsoft SQL Server\130\DAC\bin\sqlpackage.exe'
+$sqlpackage = get-childitem 'C:\Program Files (x86)\Microsoft SQL Server\140\DAC\bin\sqlpackage.exe'
 
 #declare a select query for databases
 $dbsql = @"
@@ -72,7 +72,7 @@ foreach($instance in $Instances){
 }
 
 #But once you write it, it's easy to call
-Export-SQLDacPacs -instances 'PICARD' -outputdirectory 'C:\IntroToPowershell'
+Export-SQLDacPacs -instances 'TARKIN' -outputdirectory 'C:\IntroToPowershell'
 
 function Optimize-SQLMemory{
 <#
@@ -135,7 +135,7 @@ if($apply){
  }
 }
 
-Optimize-SQLMemory -target 'PICARD'
+Optimize-SQLMemory -target 'TARKIN'
 
 function Measure-SQLExecution{
     param($instancename
@@ -171,9 +171,9 @@ function Measure-SQLExecution{
 #Measure-SQLExecution -instancename 'localhost' -databasename 'demoPartition' -sqlcmd 'exec usp_loadpartitiondata;'
 
 $total = @()
-$total += Measure-SQLExecution -instancename 'PICARD' -databasename 'demoPartition' -sqlcmd 'truncate table dbo.orders;'
-$total += Measure-SQLExecution -instancename 'PICARD' -databasename 'demoPartition' -sqlcmd 'exec usp_loadpartitiondata;'
-$total += Measure-SQLExecution -instancename 'PICARD' -databasename 'demoPartition' -sqlcmd 'exec usp_fragmentpartition;'
+$total += Measure-SQLExecution -instancename 'TARKIN' -databasename 'demoPartition' -sqlcmd 'truncate table dbo.orders;'
+$total += Measure-SQLExecution -instancename 'TARKIN' -databasename 'demoPartition' -sqlcmd 'exec usp_loadpartitiondata;'
+$total += Measure-SQLExecution -instancename 'TARKIN' -databasename 'demoPartition' -sqlcmd 'exec usp_fragmentpartition;'
 $total
 
 $total | Select-Object InstanceName,DatabaseName,StartTime,EndTime,SQL,RunDuration | Export-Csv -Path 'C:\Temp\ExecutionLog.csv' -NoTypeInformation
@@ -183,8 +183,8 @@ notepad 'C:\Temp\ExecutionLog.csv'
 #SQLInventory example
 #first, make sure database objects exist
 #.\SQLInventoryObjects.sql
-Invoke-Sqlcmd -ServerInstance PICARD -Database master -Query "IF EXISTS (SELECT 1 FROM sys.databases WHERE name = 'MSFADMIN') DROP DATABASE MSFADMIN;"
-Invoke-Sqlcmd -ServerInstance PICARD -Database master -InputFile 'C:\IntroToPowershell\SQLInventoryObjects.sql'
+Invoke-Sqlcmd -ServerInstance TARKIN -Database master -Query "IF EXISTS (SELECT 1 FROM sys.databases WHERE name = 'MSFADMIN') DROP DATABASE MSFADMIN;"
+Invoke-Sqlcmd -ServerInstance TARKIN -Database master -InputFile 'C:\IntroToPowershell\SQLInventoryObjects.sql'
 
 #import the module
 Import-Module SQLInventory -Verbose
@@ -196,11 +196,11 @@ Get-command -Module SQLInventory
 
 
 #run the primary inventory collection function
-$CMS='PICARD'
+$CMS='TARKIN'
 $servers=@((dir "SQLSERVER:\SQLRegistration\Central Management Server Group\$CMS").Name)
 
 $servers+=$cms
-Get-SQLInventory -invlist $servers -invserv 'PICARD' -invdb 'MSFADMIN'
+Get-SQLInventory -invlist $servers -invserv 'TARKIN' -invdb 'MSFADMIN'
 
-Invoke-Sqlcmd -ServerInstance PICARD -Database MSFADMIN -Query 'SELECT * FROM dbo.InstanceInventory;' | ft
-Invoke-Sqlcmd -ServerInstance PICARD -Database MSFADMIN -Query 'SELECT * FROM dbo.MachineInventory;' | ft
+Invoke-Sqlcmd -ServerInstance TARKIN -Database MSFADMIN -Query 'SELECT * FROM dbo.InstanceInventory;' | ft
+Invoke-Sqlcmd -ServerInstance TARKIN -Database MSFADMIN -Query 'SELECT * FROM dbo.MachineInventory;' | ft

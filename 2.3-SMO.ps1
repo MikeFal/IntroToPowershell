@@ -3,7 +3,7 @@
 #All the SMO classes are loaded with the module, but if you load them separately you can use the following syntax
 [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | out-null
 
-$smoserver = new-object 'Microsoft.SqlServer.Management.Smo.Server' 'PICARD' 
+$smoserver = new-object 'Microsoft.SqlServer.Management.Smo.Server' 'TARKIN' 
 
 #We can now interact with the server as it is an object
 $smoserver | Get-Member
@@ -15,7 +15,7 @@ $smoserver.Databases
 #now we have a table object with its own properties
 $sysjobs = $smoserver.Databases["msdb"].Tables["sysjobs"]
 $sysjobs | Get-Member
-$sysjobs.Indexes
+$sysjobs.Indexes[0].Script()
 $sysjobs.Script()
 
 #we can now make collections
@@ -34,7 +34,7 @@ $db | Get-Member
 #so let's create it
 $db.Create()
 
-dir SQLSERVER:\SQL\PICARD\DEFAULT\DATABASES
+dir SQLSERVER:\SQL\TARKIN\DEFAULT\DATABASES
 
 #but we don't want the files in the default location.  So now the fun begins.
 $db.Drop()
@@ -63,7 +63,7 @@ $db.Script()
 
 #or we can just create it
 $db.Create()
-dir SQLSERVER:\SQL\PICARD\DEFAULT\DATABASES
+dir SQLSERVER:\SQL\TARKIN\DEFAULT\DATABASES
 
 #Cleanup!
 $db.Drop()

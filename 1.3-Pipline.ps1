@@ -13,7 +13,7 @@ Get-Help about* | Measure-Object
 
 #Remember our file writing example? Well, we can use the pipeline for this to make it easier
 New-Item -ItemType Directory -Path 'C:\Test'
-'The quick brown fox jumps over the lazy dog. Again.' | Out-File -FilePath 'C:\Test\Dummy.txt'
+'The quick brown fox jumps over the lazy dog. Again.' | Out-File -FilePath 'C:\Test\Dummy.txt' -Append
 notepad 'C:\Test\Dummy.txt'
 
 
@@ -21,12 +21,12 @@ notepad 'C:\Test\Dummy.txt'
 $files = @('Junk1.txt','Junk2.txt','Junk3.txt','Junk4.txt')
 $files | ForEach-Object {New-Item -ItemType file -Path "C:\Test\$_"}
 
-cls
+Clear-Host
 dir C:\Test
 
-dir C:\Test | Remove-Item
+dir C:\Test | Remove-Item -WhatIf
 
-cls
+Clear-Host
 dir C:\Test
 
 #let's start expanding other commands
@@ -41,9 +41,9 @@ Get-WmiObject win32_volume |
 
 #remove old backup files
 #nothing up my sleeve!
-Get-ChildItem '\\PICARD\C$\Backups' -recurse
+Get-ChildItem '\\TARKIN\C$\Backups' -recurse
 
-#clean out 'old' transaction log backups
-Get-ChildItem '\\PICARD\C$\Backups' -Recurse | 
+#clean out 'old' TARKIN log backups
+Get-ChildItem '\\TARKIN\C$\Backups' -Recurse | 
     Where-Object {$_.Extension  -eq ".trn" -and $_.LastWriteTime -lt (Get-Date).AddHours(-3)} |
     Remove-Item -WhatIf

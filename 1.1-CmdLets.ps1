@@ -39,7 +39,7 @@ notepad.exe 'C:\Test\Dummy.txt'
 Remove-Item -Path 'C:\Test' -Recurse -Force
 
 #We can test connections with Test-Connection. It's like ping, but while ping is it's own executable, this is part of the language
-Test-Connection PICARD
+Test-Connection TARKIN
 
 #Get-ChildItem gets all the contents of a directory
 Get-ChildItem C:\

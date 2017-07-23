@@ -31,7 +31,7 @@ function Get-FreeSpace{
 
 }
 
-Get-FreeSpace PICARD
+Get-FreeSpace TARKIN
 Get-FreeSpace localhost
 
 #We can get a listing of all our available modules
